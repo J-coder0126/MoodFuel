@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MoodFuel 心情補給站會依照你的心情、能量與時間，推薦一個現在就能完成的休息活動。">
+  <meta name="theme-color" content="#173b78">
+  <title>MoodFuel 心情補給站</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23173b78'/%3E%3Cpath d='M34 8 17 35h14l-2 21 18-30H33z' fill='%23ffd43b' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef4ff;
+      --bg-2: #f9fbff;
+      --surface: rgba(255, 255, 255, .94);
+      --surface-solid: #fff;
+      --surface-soft: #f2f6ff;
+      --ink: #102348;
+      --muted: #5f6f8e;
+      --line: #dce5f5;
+      --primary: #173b78;
+      --primary-2: #245bb4;
+      --accent: #ffd43b;
+      --accent-ink: #3e3100;
+      --success: #0c8a63;
+      --danger: #c23a4b;
+      --shadow: 0 24px 60px rgba(27, 60, 117, .13);
+      --radius-lg: 28px;
+      --radius-md: 19px;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #07142d;
+      --bg-2: #0b1d3c;
+      --surface: rgba(15, 35, 70, .94);
+      --surface-solid: #0f2346;
+      --surface-soft: #132b52;
+      --ink: #f3f7ff;
+      --muted: #b7c4df;
+      --line: #29456f;
+      --primary: #8eb8ff;
+      --primary-2: #70a5ff;
+      --accent: #ffd43b;
+      --accent-ink: #332800;
+      --success: #58d4a7;
+      --danger: #ff8c9b;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .32);
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 2%, rgba(50, 112, 216, .22), transparent 29rem),
+        radial-gradient(circle at 92% 28%, rgba(255, 212, 59, .18), transparent 26rem),
+        linear-gradient(160deg, var(--bg), var(--bg-2));
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, summary:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--primary-2) 55%, transparent);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed; left: 18px; top: -70px; z-index: 100;
+      padding: 10px 16px; border-radius: 12px; background: var(--primary); color: var(--surface-solid);
+    }
+    .skip-link:focus { top: 18px; }
+
+    .page-shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 4px 2px 22px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      display: grid; place-items: center; width: 46px; height: 46px; border-radius: 16px;
+      background: var(--primary); color: var(--accent); box-shadow: 0 9px 22px rgba(23, 59, 120, .25);
+      font-size: 1.55rem; transform: rotate(-5deg);
+    }
+    .brand-title { margin: 0; font-size: 1.2rem; line-height: 1.2; letter-spacing: .02em; }
+    .brand-sub { display: block; color: var(--muted); font-size: .82rem; font-weight: 600; }
+    .top-actions { display: flex; gap: 9px; }
+    .icon-btn, .ghost-btn, .secondary-btn, .primary-btn, .danger-btn {
+      border: 0; cursor: pointer; transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+    .icon-btn:hover, .ghost-btn:hover, .secondary-btn:hover, .primary-btn:hover { transform: translateY(-2px); }
+    .icon-btn {
+      min-width: 46px; height: 46px; padding: 0 14px; border: 1px solid var(--line); border-radius: 15px;
+      background: var(--surface); box-shadow: 0 8px 22px rgba(23, 59, 120, .08); font-weight: 800;
+    }
+
+    .intro {
+      position: relative; overflow: hidden; display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px;
+      padding: 34px 38px; border-radius: var(--radius-lg); color: #fff;
+      background: linear-gradient(125deg, #102f67 0%, #1d4d99 61%, #2b64bc 100%);
+      box-shadow: var(--shadow);
+    }
+    .intro::after {
+      content: ""; position: absolute; width: 310px; height: 310px; right: -75px; top: -130px;
+      border: 44px solid rgba(255, 255, 255, .08); border-radius: 50%;
+    }
+    .eyebrow { margin: 0 0 7px; color: #ffe269; font-size: .86rem; font-weight: 900; letter-spacing: .15em; }
+    .intro h1 { margin: 0; max-width: 620px; font-size: clamp(2rem, 4.6vw, 3.7rem); line-height: 1.13; letter-spacing: -.045em; }
+    .intro-copy { margin: 17px 0 0; max-width: 650px; color: #dce9ff; font-size: 1.03rem; }
+    .intro-note {
+      align-self: end; position: relative; z-index: 1; padding: 20px; border: 1px solid rgba(255,255,255,.18);
+      border-radius: 22px; background: rgba(255,255,255,.11); backdrop-filter: blur(8px);
+    }
+    .intro-note strong { display: block; margin-bottom: 4px; color: #ffe269; }
+    .intro-note p { margin: 0; color: #e9f1ff; font-size: .92rem; }
+
+    .stats {
+      position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      width: min(620px, calc(100% - 32px)); margin: -18px auto 24px; padding: 10px;
+      border: 1px solid var(--line); border-radius: 21px; background: var(--surface); box-shadow: 0 14px 35px rgba(23, 59, 120, .11);
+      backdrop-filter: blur(12px);
+    }
+    .stat { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 9px 10px; border-radius: 14px; }
+    .stat + .stat { border-left: 1px solid var(--line); }
+    .stat-icon { font-size: 1.25rem; }
+    .stat-copy { line-height: 1.15; }
+    .stat-value { display: block; font-size: 1.1rem; font-weight: 900; }
+    .stat-label { color: var(--muted); font-size: .76rem; font-weight: 700; }
+
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .92fr); gap: 22px; align-items: start; }
+    .card {
+      border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    .setup-card, .result-card { padding: 28px; }
+    .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    .step-kicker { margin: 0 0 3px; color: var(--primary-2); font-size: .78rem; font-weight: 900; letter-spacing: .12em; }
+    .section-head h2, .history-head h2 { margin: 0; font-size: clamp(1.35rem, 2.5vw, 1.8rem); line-height: 1.25; }
+    .section-head p { margin: 7px 0 0; color: var(--muted); font-size: .92rem; }
+
+    .field { margin-top: 25px; }
+    .field:first-of-type { margin-top: 0; }
+    .field-label { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 11px; font-weight: 900; }
+    .field-label small { color: var(--muted); font-weight: 700; }
+    .mood-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
+    .mood-btn {
+      display: grid; gap: 5px; justify-items: center; min-height: 91px; padding: 13px 7px;
+      border: 1px solid var(--line); border-radius: 17px; background: var(--surface-solid); cursor: pointer;
+      transition: transform .16s ease, border .16s ease, background .16s ease, box-shadow .16s ease;
+    }
+    .mood-btn:hover { transform: translateY(-3px); border-color: var(--primary-2); }
+    .mood-btn[aria-pressed="true"] {
+      border: 2px solid var(--primary-2); background: color-mix(in srgb, var(--primary-2) 10%, var(--surface-solid));
+      box-shadow: 0 8px 18px color-mix(in srgb, var(--primary-2) 16%, transparent);
+    }
+    .mood-emoji { font-size: 1.75rem; line-height: 1; }
+    .mood-name { font-size: .88rem; font-weight: 900; }
+
+    .energy-wrap { padding: 16px 17px 13px; border-radius: 18px; background: var(--surface-soft); }
+    .energy-value { color: var(--primary-2); font-size: 1.06rem; font-weight: 900; }
+    input[type="range"] { width: 100%; accent-color: var(--primary-2); cursor: pointer; }
+    .range-labels { display: flex; justify-content: space-between; margin-top: 3px; color: var(--muted); font-size: .75rem; font-weight: 700; }
+
+    .duration-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+    .choice-btn {
+      padding: 11px 8px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-solid);
+      font-weight: 900; cursor: pointer; transition: transform .16s ease, border .16s ease, background .16s ease;
+    }
+    .choice-btn:hover { transform: translateY(-2px); border-color: var(--primary-2); }
+    .choice-btn[aria-pressed="true"] { border-color: var(--primary-2); background: var(--primary); color: var(--surface-solid); }
+    html[data-theme="dark"] .choice-btn[aria-pressed="true"] { color: #07142d; }
+
+    .demo-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 22px;
+      padding: 13px 15px; border: 1px dashed var(--line); border-radius: 16px; background: var(--surface-soft);
+    }
+    .demo-row span { display: block; font-weight: 900; }
+    .demo-row small { display: block; color: var(--muted); }
+    .switch { position: relative; display: inline-block; flex: 0 0 auto; width: 52px; height: 30px; }
+    .switch input { position: absolute; opacity: 0; pointer-events: none; }
+    .switch-track { position: absolute; inset: 0; border-radius: 20px; background: #a8b5cb; cursor: pointer; transition: .2s; }
+    .switch-track::after { content: ""; position: absolute; width: 22px; height: 22px; left: 4px; top: 4px; border-radius: 50%; background: #fff; transition: .2s; box-shadow: 0 2px 7px rgba(0,0,0,.2); }
+    .switch input:checked + .switch-track { background: var(--primary-2); }
+    .switch input:checked + .switch-track::after { transform: translateX(22px); }
+    .switch input:focus-visible + .switch-track { outline: 3px solid color-mix(in srgb, var(--primary-2) 55%, transparent); outline-offset: 3px; }
+
+    .primary-btn, .secondary-btn, .ghost-btn, .danger-btn {
+      min-height: 46px; padding: 11px 18px; border-radius: 15px; font-weight: 900;
+    }
+    .primary-btn { background: var(--accent); color: var(--accent-ink); box-shadow: 0 10px 22px rgba(255, 191, 0, .24); }
+    .primary-btn:hover { box-shadow: 0 13px 27px rgba(255, 191, 0, .3); }
+    .primary-btn:disabled, .secondary-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+    .secondary-btn { background: var(--primary); color: var(--surface-solid); }
+    html[data-theme="dark"] .secondary-btn { color: #07142d; }
+    .ghost-btn { border: 1px solid var(--line); background: var(--surface-solid); }
+    .danger-btn { border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); background: transparent; color: var(--danger); }
+    .wide-btn { width: 100%; margin-top: 23px; }
+
+    .message { min-height: 28px; margin: 12px 0 -5px; color: var(--danger); font-size: .88rem; font-weight: 800; }
+
+    .result-card { position: sticky; top: 18px; overflow: hidden; min-height: 610px; }
+    .empty-state { display: grid; place-items: center; min-height: 460px; padding: 35px 20px; text-align: center; }
+    .empty-orbit {
+      position: relative; display: grid; place-items: center; width: 145px; height: 145px; margin-bottom: 20px;
+      border: 1px dashed var(--line); border-radius: 50%; background: var(--surface-soft);
+    }
+    .empty-orbit::before { content: ""; position: absolute; width: 98px; height: 98px; border: 1px solid var(--line); border-radius: 50%; }
+    .empty-icon { position: relative; z-index: 1; font-size: 3.2rem; animation: float 2.6s ease-in-out infinite; }
+    @keyframes float { 50% { transform: translateY(-7px) rotate(3deg); } }
+    .empty-state h2 { margin: 0; font-size: 1.5rem; }
+    .empty-state p { max-width: 340px; margin: 8px auto 0; color: var(--muted); }
+
+    .recommendation { display: none; }
+    .recommendation.active { display: block; animation: rise .35s ease both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+    .result-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .result-badge { padding: 5px 10px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: .76rem; font-weight: 900; letter-spacing: .04em; }
+    .result-number { color: var(--muted); font-size: .78rem; font-weight: 800; }
+    .activity-icon {
+      display: grid; place-items: center; width: 78px; height: 78px; margin-top: 22px; border-radius: 25px;
+      background: linear-gradient(145deg, var(--primary), var(--primary-2)); color: #fff; font-size: 2.25rem;
+      box-shadow: 0 14px 30px color-mix(in srgb, var(--primary-2) 23%, transparent);
+    }
+    .recommendation h2 { margin: 14px 0 4px; font-size: 2rem; line-height: 1.2; }
+    .activity-meta { margin: 0 0 14px; color: var(--muted); font-weight: 700; }
+    .reason-box { margin: 16px 0; padding: 14px 16px; border-left: 4px solid var(--accent); border-radius: 5px 15px 15px 5px; background: var(--surface-soft); }
+    .reason-box strong { display: block; margin-bottom: 2px; }
+    .reason-box p { margin: 0; color: var(--muted); font-size: .91rem; }
+    .steps { margin: 15px 0 0; padding: 0; list-style: none; counter-reset: action; }
+    .steps li { position: relative; margin: 9px 0; padding-left: 37px; color: var(--muted); }
+    .steps li::before {
+      counter-increment: action; content: counter(action); position: absolute; left: 0; top: 1px;
+      display: grid; place-items: center; width: 25px; height: 25px; border-radius: 9px;
+      background: var(--surface-soft); color: var(--primary-2); font-size: .76rem; font-weight: 900;
+    }
+
+    .timer-panel { margin-top: 20px; padding: 18px; border-radius: 21px; background: var(--primary); color: #fff; }
+    html[data-theme="dark"] .timer-panel { color: #fff; background: #071a39; border: 1px solid var(--line); }
+    .timer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .timer-label { color: #d8e6ff; font-size: .8rem; font-weight: 800; }
+    .timer-display { margin: 2px 0 10px; font: 900 clamp(2.6rem, 7vw, 4.5rem)/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: -.07em; }
+    .timer-progress { height: 7px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.18); }
+    .timer-progress > span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--accent); transition: width .4s linear; }
+    .timer-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 13px; }
+    .timer-actions button { min-height: 40px; padding: 8px; border: 1px solid rgba(255,255,255,.18); border-radius: 12px; background: rgba(255,255,255,.11); color: #fff; font-weight: 900; cursor: pointer; }
+    .timer-actions button:hover { background: rgba(255,255,255,.18); }
+    .result-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 14px; }
+
+    .history-card { margin-top: 22px; padding: 28px; }
+    .history-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+    .history-head p { margin: 6px 0 0; color: var(--muted); }
+    .history-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+    .history-item {
+      display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 13px;
+      padding: 13px 15px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface-solid);
+    }
+    .history-emoji { display: grid; place-items: center; width: 41px; height: 41px; border-radius: 13px; background: var(--surface-soft); font-size: 1.25rem; }
+    .history-name { display: block; font-weight: 900; }
+    .history-meta { color: var(--muted); font-size: .8rem; }
+    .history-star { color: #d69d00; font-weight: 900; }
+    .empty-history { padding: 23px; border: 1px dashed var(--line); border-radius: 16px; color: var(--muted); text-align: center; }
+
+    details.info { margin-top: 22px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+    details.info summary { padding: 16px 20px; cursor: pointer; font-weight: 900; }
+    .info-body { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 20px 20px; }
+    .info-step { padding: 14px; border-radius: 15px; background: var(--surface-soft); }
+    .info-step b { display: block; margin-bottom: 3px; color: var(--primary-2); }
+    .info-step span { color: var(--muted); font-size: .86rem; }
+    footer { padding: 27px 12px 0; color: var(--muted); text-align: center; font-size: .83rem; }
+
+    .toast {
+      position: fixed; z-index: 60; left: 50%; bottom: 24px; max-width: min(430px, calc(100% - 30px));
+      padding: 12px 18px; border-radius: 15px; background: #0f2346; color: #fff; box-shadow: 0 18px 45px rgba(0,0,0,.25);
+      font-weight: 800; text-align: center; opacity: 0; transform: translate(-50%, 20px); pointer-events: none; transition: .25s;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    dialog { width: min(430px, calc(100% - 30px)); padding: 0; border: 0; border-radius: 24px; background: var(--surface-solid); color: var(--ink); box-shadow: 0 30px 90px rgba(0,0,0,.32); }
+    dialog::backdrop { background: rgba(3, 11, 25, .62); backdrop-filter: blur(4px); }
+    .dialog-body { padding: 25px; }
+    .dialog-body h2 { margin: 0 0 7px; }
+    .dialog-body p { margin: 0; color: var(--muted); }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 22px; }
+
+    .celebration { position: fixed; z-index: 55; inset: 0; pointer-events: none; overflow: hidden; }
+    .spark { position: absolute; top: -40px; animation: fall 1.8s ease-in forwards; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(450deg); opacity: .2; } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    }
+
+    @media (max-width: 900px) {
+      .intro { grid-template-columns: 1fr; }
+      .intro-note { max-width: 520px; }
+      .workspace { grid-template-columns: 1fr; }
+      .result-card { position: static; min-height: auto; }
+      .empty-state { min-height: 360px; }
+      .info-body { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 620px) {
+      .page-shell { width: min(100% - 20px, 1180px); padding-top: 14px; }
+      .brand-sub { display: none; }
+      .icon-btn .text { display: none; }
+      .intro { padding: 27px 23px 34px; border-radius: 22px; }
+      .intro h1 { font-size: 2.3rem; }
+      .stats { width: calc(100% - 20px); grid-template-columns: 1fr 1fr; margin-top: -16px; }
+      .stat:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+      .setup-card, .result-card, .history-card { padding: 20px; border-radius: 22px; }
+      .mood-grid { grid-template-columns: repeat(5, minmax(54px, 1fr)); gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+      .mood-btn { min-height: 82px; padding: 10px 4px; }
+      .mood-name { font-size: .78rem; }
+      .duration-grid { grid-template-columns: 1fr 1fr; }
+      .result-actions { grid-template-columns: 1fr; }
+      .history-head { align-items: flex-start; flex-direction: column; }
+      .history-item { grid-template-columns: auto 1fr; }
+      .history-star { grid-column: 2; }
+      .info-body { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="MoodFuel 心情補給站">
+        <div class="brand-mark" aria-hidden="true">⚡</div>
+        <div>
+          <p class="brand-title"><strong>MoodFuel</strong> 心情補給站</p>
+          <span class="brand-sub">給自己一段剛剛好的充電時間</span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="切換深色模式" title="切換深色模式"><span id="themeIcon" aria-hidden="true">☾</span> <span class="text">模式</span></button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="intro" aria-labelledby="pageTitle">
+        <div>
+          <p class="eyebrow">MOOD CHECK-IN</p>
+          <h1 id="pageTitle">現在的你，<br>需要哪一種補給？</h1>
+          <p class="intro-copy">選擇此刻的心情、能量與空檔時間，我們會替你安排一個現在就能完成的小休息。</p>
+        </div>
+        <aside class="intro-note">
+          <strong>小提醒</strong>
+          <p>休息不是偷懶，而是替下一段專注預留能量。這裡不做診斷，只提供日常的自我照顧靈感。</p>
+        </aside>
+      </section>
+
+      <section class="stats" aria-label="今日補給紀錄">
+        <div class="stat"><span class="stat-icon" aria-hidden="true">⭐</span><div class="stat-copy"><span class="stat-value" id="starCount">0</span><span class="stat-label">累積星星</span></div></div>
+        <div class="stat"><span class="stat-icon" aria-hidden="true">✓</span><div class="stat-copy"><span class="stat-value" id="todayCount">0</span><span class="stat-label">今日完成</span></div></div>
+        <div class="stat"><span class="stat-icon" aria-hidden="true">◷</span><div class="stat-copy"><span class="stat-value" id="lastActivity">尚未開始</span><span class="stat-label">最近補給</span></div></div>
+      </section>
+
+      <div class="workspace">
+        <section class="card setup-card" aria-labelledby="setupTitle">
+          <div class="section-head">
+            <div>
+              <p class="step-kicker">STEP 01</p>
+              <h2 id="setupTitle">描述現在的狀態</h2>
+              <p>不用想太久，選最接近此刻感受的答案。</p>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label"><span>我現在覺得⋯</span><small>請選一項</small></div>
+            <div class="mood-grid" id="moodGrid" role="group" aria-label="選擇目前心情">
+              <button class="mood-btn" type="button" data-mood="happy" aria-pressed="false"><span class="mood-emoji">😊</span><span class="mood-name">開心</span></button>
+              <button class="mood-btn" type="button" data-mood="normal" aria-pressed="false"><span class="mood-emoji">🙂</span><span class="mood-name">普通</span></button>
+              <button class="mood-btn" type="button" data-mood="tired" aria-pressed="false"><span class="mood-emoji">😴</span><span class="mood-name">疲累</span></button>
+              <button class="mood-btn" type="button" data-mood="anxious" aria-pressed="false"><span class="mood-emoji">😟</span><span class="mood-name">焦慮</span></button>
+              <button class="mood-btn" type="button" data-mood="angry" aria-pressed="false"><span class="mood-emoji">😤</span><span class="mood-name">生氣</span></button>
+            </div>
+          </div>
+
+          <div class="field energy-wrap">
+            <label class="field-label" for="energyRange"><span>目前能量</span><span class="energy-value"><span id="energyValue">55</span>% · <span id="energyLabel">中等</span></span></label>
+            <input id="energyRange" type="range" min="0" max="100" value="55" step="1">
+            <div class="range-labels"><span>需要充電</span><span>狀態滿格</span></div>
+          </div>
+
+          <div class="field">
+            <div class="field-label"><span>我有多少時間？</span><small>請選一項</small></div>
+            <div class="duration-grid" id="durationGrid" role="group" aria-label="選擇可用時間">
+              <button class="choice-btn" type="button" data-duration="3" aria-pressed="false">3 分鐘</button>
+              <button class="choice-btn" type="button" data-duration="5" aria-pressed="false">5 分鐘</button>
+              <button class="choice-btn" type="button" data-duration="10" aria-pressed="false">10 分鐘</button>
+              <button class="choice-btn" type="button" data-duration="20" aria-pressed="false">20 分鐘</button>
+            </div>
+          </div>
+
+          <label class="demo-row" for="demoMode">
+            <span><span>15 秒示範模式</span><small>展示作品時不用等完整分鐘數</small></span>
+            <span class="switch"><input id="demoMode" type="checkbox"><span class="switch-track" aria-hidden="true"></span></span>
+          </label>
+
+          <button class="primary-btn wide-btn" id="generateBtn" type="button">產生我的補給方案</button>
+          <p class="message" id="formMessage" role="alert" aria-live="polite"></p>
+        </section>
+
+        <section class="card result-card" id="resultCard" aria-live="polite">
+          <div class="empty-state" id="emptyState">
+            <div>
+              <div class="empty-orbit"><span class="empty-icon" aria-hidden="true">🔋</span></div>
+              <h2>補給方案準備中</h2>
+              <p>完成左側三項設定後，我們會依照你現在的狀態推薦活動。</p>
+            </div>
+          </div>
+
+          <div class="recommendation" id="recommendation">
+            <div class="result-top"><span class="result-badge">為你推薦</span><span class="result-number" id="resultNumber"></span></div>
+            <div class="activity-icon" id="activityIcon" aria-hidden="true">🌬️</div>
+            <h2 id="activityTitle">深呼吸練習</h2>
+            <p class="activity-meta" id="activityMeta"></p>
+            <div class="reason-box"><strong>為什麼推薦這個？</strong><p id="activityReason"></p></div>
+            <ol class="steps" id="activitySteps"></ol>
+
+            <div class="timer-panel">
+              <div class="timer-head"><span class="timer-label" id="timerLabel">準備好就開始</span><span aria-hidden="true">⏱</span></div>
+              <div class="timer-display" id="timerDisplay" aria-live="off">00:00</div>
+              <div class="timer-progress" aria-hidden="true"><span id="timerProgress"></span></div>
+              <div class="timer-actions">
+                <button id="startPauseBtn" type="button">開始</button>
+                <button id="resetTimerBtn" type="button">重設</button>
+                <button id="completeBtn" type="button" disabled>完成</button>
+              </div>
+            </div>
+            <div class="result-actions">
+              <button class="ghost-btn" id="rerollBtn" type="button">換一個方案</button>
+              <button class="secondary-btn" id="newCheckinBtn" type="button">重新選擇狀態</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="card history-card" aria-labelledby="historyTitle">
+        <div class="history-head">
+          <div><p class="step-kicker">MY RECORD</p><h2 id="historyTitle">我的補給紀錄</h2><p>只保存在這台裝置的瀏覽器，不會上傳任何資料。</p></div>
+          <button class="danger-btn" id="clearBtn" type="button">清除紀錄</button>
+        </div>
+        <ul class="history-list" id="historyList"></ul>
+      </section>
+
+      <details class="info">
+        <summary>第一次使用？查看四個步驟</summary>
+        <div class="info-body">
+          <div class="info-step"><b>01 選擇心情</b><span>找出最接近此刻的感受。</span></div>
+          <div class="info-step"><b>02 設定狀態</b><span>告訴我們能量和空檔時間。</span></div>
+          <div class="info-step"><b>03 開始補給</b><span>跟著方案啟動倒數計時。</span></div>
+          <div class="info-step"><b>04 收下星星</b><span>完成後留下今天的紀錄。</span></div>
+        </div>
+      </details>
+    </main>
+
+    <footer>
+      <p>MoodFuel 心情補給站 · 本網站提供一般休息活動建議，不取代專業醫療或心理諮詢。</p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="celebration" id="celebration" aria-hidden="true"></div>
+
+  <dialog id="clearDialog" aria-labelledby="dialogTitle">
+    <div class="dialog-body">
+      <h2 id="dialogTitle">確定清除所有紀錄？</h2>
+      <p>累積星星與活動紀錄都會刪除，這個動作無法復原。</p>
+      <div class="dialog-actions">
+        <button class="ghost-btn" id="cancelClearBtn" type="button">保留紀錄</button>
+        <button class="danger-btn" id="confirmClearBtn" type="button">確定清除</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const moods = {
+        happy: { name: "開心", emoji: "😊" },
+        normal: { name: "普通", emoji: "🙂" },
+        tired: { name: "疲累", emoji: "😴" },
+        anxious: { name: "焦慮", emoji: "😟" },
+        angry: { name: "生氣", emoji: "😤" }
+      };
+
+      const activities = [
+        { id: "box-breath", title: "方形呼吸練習", icon: "🌬️", moods: ["anxious", "angry", "tired"], energy: ["low", "mid", "high"], min: 3, tags: "安定節奏 · 放鬆注意力", steps: ["坐穩，將雙腳輕放在地面。", "吸氣 4 秒、停留 4 秒、吐氣 4 秒、再停留 4 秒。", "持續緩慢循環，注意肩膀逐漸放鬆。"] },
+        { id: "water", title: "慢慢喝一杯水", icon: "💧", moods: ["tired", "normal", "happy"], energy: ["low", "mid"], min: 3, tags: "補充水分 · 短暫離席", steps: ["離開座位，替自己倒一杯水。", "分幾口慢慢喝，感受溫度與吞嚥。", "回到座位前，做一次長長的吐氣。"] },
+        { id: "eye-rest", title: "20-20-20 眼睛休息", icon: "👀", moods: ["tired", "normal", "anxious"], energy: ["low", "mid", "high"], min: 3, tags: "遠離螢幕 · 舒緩眼睛", steps: ["把視線移開螢幕。", "找到約 6 公尺外的物體，凝視至少 20 秒。", "輕輕眨眼，再閉眼休息片刻。"] },
+        { id: "stretch", title: "肩頸伸展時間", icon: "🙆", moods: ["tired", "normal", "angry"], energy: ["low", "mid", "high"], min: 5, tags: "活動身體 · 釋放緊繃", steps: ["坐直或站穩，肩膀向後繞五圈。", "頭部慢慢向左右傾斜，各停留十秒。", "雙手向上延伸，最後放鬆甩甩手臂。"] },
+        { id: "music", title: "聽一首喜歡的歌", icon: "🎧", moods: ["happy", "anxious", "tired", "normal"], energy: ["low", "mid", "high"], min: 5, tags: "轉換心情 · 暫停思緒", steps: ["挑一首現在最想聽的歌曲。", "暫時不滑手機，只專心聽聲音與節奏。", "歌曲結束後，留意自己的心情是否改變。"] },
+        { id: "walk", title: "離開座位走一走", icon: "🚶", moods: ["angry", "tired", "normal", "anxious"], energy: ["mid", "high"], min: 5, tags: "轉換環境 · 活動身體", steps: ["把手機留在桌上，站起來伸展。", "用舒服的速度走動，不必設定目的地。", "途中觀察三個平常沒有注意到的細節。"] },
+        { id: "desk", title: "整理一小塊桌面", icon: "🧹", moods: ["normal", "anxious", "happy"], energy: ["mid", "high"], min: 5, tags: "恢復秩序 · 完成小任務", steps: ["只選一個範圍，例如鍵盤旁或一個抽屜。", "丟掉垃圾，把物品放回固定位置。", "時間到就停止，不要求一次整理完。"] },
+        { id: "gratitude", title: "寫下三件小好事", icon: "✍️", moods: ["happy", "normal", "anxious"], energy: ["low", "mid", "high"], min: 5, tags: "整理想法 · 留住好心情", steps: ["拿出紙筆或開啟記事本。", "寫下今天發生的三件小好事。", "選出最想記住的一件，補上一句原因。"] },
+        { id: "brain-dump", title: "把煩惱倒到紙上", icon: "📝", moods: ["anxious", "angry"], energy: ["mid", "high"], min: 10, tags: "釋放思緒 · 找回空間", steps: ["把腦中擔心或生氣的事全部寫下來。", "先不評論，也不急著找答案。", "圈出現在能處理的一件最小行動，其餘暫時放下。"] },
+        { id: "mini-meditation", title: "身體掃描練習", icon: "🧘", moods: ["anxious", "angry", "tired"], energy: ["low", "mid"], min: 10, tags: "回到當下 · 深度放鬆", steps: ["找一個舒服姿勢，閉眼或放低視線。", "從額頭、肩膀到腳趾，依序感受身體。", "遇到緊繃處就慢慢吐氣，不需要強迫放鬆。"] },
+        { id: "outside", title: "到戶外換一口氣", icon: "🌿", moods: ["tired", "angry", "normal", "happy"], energy: ["mid", "high"], min: 10, tags: "接觸自然 · 轉換場景", steps: ["走到戶外、窗邊或有自然光的地方。", "放慢腳步，留意風、光線與周圍聲音。", "回來前做三次深呼吸，感受新的精神狀態。"] },
+        { id: "power-rest", title: "安靜閉眼休息", icon: "🌙", moods: ["tired", "anxious"], energy: ["low"], min: 10, tags: "降低刺激 · 補充能量", steps: ["將通知暫時靜音，找安全舒適的位置。", "閉上眼睛，把注意力放在自然呼吸。", "計時結束後慢慢張開眼睛，伸展再起身。"] }
+      ];
+
+      const STORAGE_KEY = "moodFuelRecordsV1";
+      const THEME_KEY = "moodFuelThemeV1";
+      const state = {
+        mood: null,
+        energy: 55,
+        duration: null,
+        currentActivity: null,
+        recommendationNumber: 0,
+        timerTotal: 0,
+        timerLeft: 0,
+        timerId: null,
+        timerRunning: false,
+        timerFinished: false,
+        completedCurrent: false,
+        records: loadRecords()
+      };
+
+      const $ = (selector) => document.querySelector(selector);
+      const $$ = (selector) => [...document.querySelectorAll(selector)];
+      const el = {
+        moodButtons: $$(".mood-btn"), durationButtons: $$(".choice-btn"),
+        energyRange: $("#energyRange"), energyValue: $("#energyValue"), energyLabel: $("#energyLabel"),
+        demoMode: $("#demoMode"), generateBtn: $("#generateBtn"), formMessage: $("#formMessage"),
+        emptyState: $("#emptyState"), recommendation: $("#recommendation"), resultCard: $("#resultCard"),
+        resultNumber: $("#resultNumber"), activityIcon: $("#activityIcon"), activityTitle: $("#activityTitle"),
+        activityMeta: $("#activityMeta"), activityReason: $("#activityReason"), activitySteps: $("#activitySteps"),
+        timerLabel: $("#timerLabel"), timerDisplay: $("#timerDisplay"), timerProgress: $("#timerProgress"),
+        startPauseBtn: $("#startPauseBtn"), resetTimerBtn: $("#resetTimerBtn"), completeBtn: $("#completeBtn"),
+        rerollBtn: $("#rerollBtn"), newCheckinBtn: $("#newCheckinBtn"), starCount: $("#starCount"),
+        todayCount: $("#todayCount"), lastActivity: $("#lastActivity"), historyList: $("#historyList"),
+        clearBtn: $("#clearBtn"), clearDialog: $("#clearDialog"), cancelClearBtn: $("#cancelClearBtn"),
+        confirmClearBtn: $("#confirmClearBtn"), themeToggle: $("#themeToggle"), themeIcon: $("#themeIcon"),
+        toast: $("#toast"), celebration: $("#celebration")
+      };
+
+      function loadRecords() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+          return Array.isArray(parsed) ? parsed : [];
+        } catch { return []; }
+      }
+      function saveRecords() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.records)); } catch {}
+      }
+      function localDateKey(date = new Date()) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      function energyBand(value) { return value <= 35 ? "low" : value <= 70 ? "mid" : "high"; }
+      function energyText(value) { return value <= 35 ? "偏低" : value <= 70 ? "中等" : "充足"; }
+      function formatTime(seconds) {
+        return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+      }
+      function toast(message) {
+        el.toast.textContent = message;
+        el.toast.classList.add("show");
+        clearTimeout(toast.id);
+        toast.id = setTimeout(() => el.toast.classList.remove("show"), 2400);
+      }
+
+      el.moodButtons.forEach(btn => btn.addEventListener("click", () => {
+        state.mood = btn.dataset.mood;
+        el.moodButtons.forEach(item => item.setAttribute("aria-pressed", String(item === btn)));
+        el.formMessage.textContent = "";
+      }));
+
+      el.durationButtons.forEach(btn => btn.addEventListener("click", () => {
+        state.duration = Number(btn.dataset.duration);
+        el.durationButtons.forEach(item => item.setAttribute("aria-pressed", String(item === btn)));
+        el.formMessage.textContent = "";
+      }));
+
+      el.energyRange.addEventListener("input", () => {
+        state.energy = Number(el.energyRange.value);
+        el.energyValue.textContent = state.energy;
+        el.energyLabel.textContent = energyText(state.energy);
+      });
+
+      function validate() {
+        if (!state.mood && !state.duration) return "請先選擇目前的心情和可用時間。";
+        if (!state.mood) return "請先選擇目前的心情。";
+        if (!state.duration) return "請選擇可用的休息時間。";
+        return "";
+      }
+
+      function reasonForCurrent() {
+        const mood = moods[state.mood].name;
+        const band = energyText(state.energy);
+        const reasons = {
+          tired: `你現在感到疲累，能量${band}。這項活動負擔不高，適合用 ${state.duration} 分鐘讓身體與注意力暫時休息。`,
+          anxious: `焦慮時，先把注意力帶回眼前的小動作會比較容易開始。這個方案能在 ${state.duration} 分鐘內幫助你放慢節奏。`,
+          angry: `生氣時身體可能累積不少張力。這項活動提供安全的轉換方式，讓情緒和身體都有一點緩衝空間。`,
+          happy: `你現在心情不錯、能量${band}，很適合用一個短活動延續這份好狀態，也替接下來的事情補充專注力。`,
+          normal: `你現在心情平穩、能量${band}。安排一段剛好的小休息，可以避免疲勞累積，也更容易回到下一段任務。`
+        };
+        return reasons[state.mood] || `依照你目前的${mood}狀態，這是一個容易開始的小活動。`;
+      }
+
+      function chooseActivity(excludeId = null) {
+        const band = energyBand(state.energy);
+        let matches = activities.filter(a => a.moods.includes(state.mood) && a.energy.includes(band) && a.min <= state.duration && a.id !== excludeId);
+        if (!matches.length) matches = activities.filter(a => a.moods.includes(state.mood) && a.min <= state.duration && a.id !== excludeId);
+        if (!matches.length) matches = activities.filter(a => a.min <= state.duration && a.id !== excludeId);
+        if (!matches.length) matches = activities.filter(a => a.id !== excludeId);
+        return matches[Math.floor(Math.random() * matches.length)];
+      }
+
+      function generateRecommendation(excludeCurrent = false) {
+        const error = validate();
+        if (error) { el.formMessage.textContent = error; return; }
+        el.formMessage.textContent = "";
+        stopTimer();
+        state.currentActivity = chooseActivity(excludeCurrent ? state.currentActivity?.id : null);
+        state.recommendationNumber += 1;
+        state.completedCurrent = false;
+        state.timerFinished = false;
+        state.timerTotal = el.demoMode.checked ? 15 : state.duration * 60;
+        state.timerLeft = state.timerTotal;
+        renderRecommendation();
+        if (window.innerWidth < 901) el.resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function renderRecommendation() {
+        const a = state.currentActivity;
+        el.emptyState.hidden = true;
+        el.recommendation.classList.add("active");
+        el.resultNumber.textContent = `方案 ${String(state.recommendationNumber).padStart(2, "0")}`;
+        el.activityIcon.textContent = a.icon;
+        el.activityTitle.textContent = a.title;
+        el.activityMeta.textContent = `${state.duration} 分鐘 · ${a.tags}`;
+        el.activityReason.textContent = reasonForCurrent();
+        el.activitySteps.innerHTML = a.steps.map(step => `<li>${step}</li>`).join("");
+        el.timerLabel.textContent = el.demoMode.checked ? "示範模式 · 15 秒" : `建議進行 ${state.duration} 分鐘`;
+        el.startPauseBtn.textContent = "開始";
+        el.completeBtn.textContent = "完成";
+        el.completeBtn.disabled = true;
+        renderTimer();
+      }
+
+      function renderTimer() {
+        el.timerDisplay.textContent = formatTime(state.timerLeft);
+        const done = state.timerTotal ? ((state.timerTotal - state.timerLeft) / state.timerTotal) * 100 : 0;
+        el.timerProgress.style.width = `${Math.min(100, done)}%`;
+      }
+      function stopTimer() {
+        clearInterval(state.timerId);
+        state.timerId = null;
+        state.timerRunning = false;
+      }
+      function tick() {
+        state.timerLeft -= 1;
+        renderTimer();
+        if (state.timerLeft <= 0) {
+          stopTimer();
+          state.timerLeft = 0;
+          state.timerFinished = true;
+          el.startPauseBtn.textContent = "再一次";
+          el.completeBtn.disabled = false;
+          el.timerLabel.textContent = "時間到！替自己收下一顆星星吧";
+          toast("補給時間完成！");
+        }
+      }
+      function toggleTimer() {
+        if (!state.currentActivity) return;
+        if (state.timerFinished) resetTimer();
+        if (state.timerRunning) {
+          stopTimer();
+          el.startPauseBtn.textContent = "繼續";
+          el.timerLabel.textContent = "已暫停，準備好再繼續";
+        } else {
+          state.timerRunning = true;
+          el.startPauseBtn.textContent = "暫停";
+          el.timerLabel.textContent = "補給進行中，慢慢來就好";
+          state.timerId = setInterval(tick, 1000);
+        }
+      }
+      function resetTimer() {
+        stopTimer();
+        state.timerFinished = false;
+        state.timerLeft = state.timerTotal;
+        el.startPauseBtn.textContent = "開始";
+        el.completeBtn.disabled = true;
+        el.timerLabel.textContent = el.demoMode.checked ? "示範模式 · 15 秒" : `建議進行 ${state.duration} 分鐘`;
+        renderTimer();
+      }
+
+      function completeActivity() {
+        if (!state.timerFinished || state.completedCurrent) return;
+        state.completedCurrent = true;
+        const now = new Date();
+        state.records.unshift({
+          id: `${now.getTime()}-${state.currentActivity.id}`,
+          dateKey: localDateKey(now),
+          time: now.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" }),
+          activity: state.currentActivity.title,
+          icon: state.currentActivity.icon,
+          mood: moods[state.mood].name,
+          duration: state.duration
+        });
+        state.records = state.records.slice(0, 30);
+        saveRecords();
+        renderStats();
+        renderHistory();
+        el.completeBtn.disabled = true;
+        el.completeBtn.textContent = "已完成 ✓";
+        celebrate();
+        toast("做得很好！你獲得了一顆星星 ⭐");
+      }
+
+      function renderStats() {
+        const today = localDateKey();
+        el.starCount.textContent = state.records.length;
+        el.todayCount.textContent = state.records.filter(r => r.dateKey === today).length;
+        el.lastActivity.textContent = state.records[0]?.activity || "尚未開始";
+      }
+      function renderHistory() {
+        if (!state.records.length) {
+          el.historyList.innerHTML = `<li class="empty-history">今天還沒有完成補給活動，第一顆星星正等著你。</li>`;
+          return;
+        }
+        el.historyList.innerHTML = state.records.slice(0, 6).map(r => `
+          <li class="history-item">
+            <span class="history-emoji" aria-hidden="true">${r.icon || "⭐"}</span>
+            <span><span class="history-name">${escapeHtml(r.activity)}</span><span class="history-meta">${escapeHtml(r.dateKey)} ${escapeHtml(r.time)} · ${escapeHtml(r.mood)} · ${Number(r.duration)} 分鐘</span></span>
+            <span class="history-star">+1 ⭐</span>
+          </li>`).join("");
+      }
+      function escapeHtml(value) {
+        const temp = document.createElement("div");
+        temp.textContent = String(value ?? "");
+        return temp.innerHTML;
+      }
+      function celebrate() {
+        const symbols = ["⭐", "✨", "●", "◆"];
+        el.celebration.innerHTML = "";
+        for (let i = 0; i < 22; i++) {
+          const spark = document.createElement("span");
+          spark.className = "spark";
+          spark.textContent = symbols[i % symbols.length];
+          spark.style.left = `${Math.random() * 100}%`;
+          spark.style.animationDelay = `${Math.random() * .45}s`;
+          spark.style.fontSize = `${14 + Math.random() * 20}px`;
+          spark.style.color = i % 2 ? "#ffd43b" : "#6ca8ff";
+          el.celebration.appendChild(spark);
+        }
+        setTimeout(() => { el.celebration.innerHTML = ""; }, 2400);
+      }
+
+      function resetCheckin() {
+        stopTimer();
+        state.mood = null;
+        state.duration = null;
+        state.currentActivity = null;
+        el.moodButtons.forEach(b => b.setAttribute("aria-pressed", "false"));
+        el.durationButtons.forEach(b => b.setAttribute("aria-pressed", "false"));
+        el.recommendation.classList.remove("active");
+        el.emptyState.hidden = false;
+        el.formMessage.textContent = "";
+        document.querySelector(".setup-card").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.dataset.theme = theme;
+        el.themeIcon.textContent = theme === "dark" ? "☀" : "☾";
+        el.themeToggle.setAttribute("aria-label", theme === "dark" ? "切換淺色模式" : "切換深色模式");
+        try { localStorage.setItem(THEME_KEY, theme); } catch {}
+      }
+      function initTheme() {
+        let saved = null;
+        try { saved = localStorage.getItem(THEME_KEY); } catch {}
+        applyTheme(saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+      }
+
+      el.generateBtn.addEventListener("click", () => generateRecommendation(false));
+      el.rerollBtn.addEventListener("click", () => generateRecommendation(true));
+      el.newCheckinBtn.addEventListener("click", resetCheckin);
+      el.startPauseBtn.addEventListener("click", toggleTimer);
+      el.resetTimerBtn.addEventListener("click", resetTimer);
+      el.completeBtn.addEventListener("click", completeActivity);
+      el.demoMode.addEventListener("change", () => {
+        if (state.currentActivity) {
+          state.timerTotal = el.demoMode.checked ? 15 : state.duration * 60;
+          resetTimer();
+          toast(el.demoMode.checked ? "已開啟 15 秒示範模式" : "已恢復完整活動時間");
+        }
+      });
+      el.themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+      el.clearBtn.addEventListener("click", () => {
+        if (!state.records.length) { toast("目前沒有可以清除的紀錄"); return; }
+        el.clearDialog.showModal();
+      });
+      el.cancelClearBtn.addEventListener("click", () => el.clearDialog.close());
+      el.confirmClearBtn.addEventListener("click", () => {
+        state.records = [];
+        saveRecords();
+        renderStats();
+        renderHistory();
+        el.clearDialog.close();
+        toast("所有補給紀錄已清除");
+      });
+      el.clearDialog.addEventListener("click", event => {
+        if (event.target === el.clearDialog) el.clearDialog.close();
+      });
+
+      initTheme();
+      renderStats();
+      renderHistory();
+    })();
+  </script>
+</body>
+</html>
